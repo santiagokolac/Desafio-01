@@ -5,12 +5,12 @@ class ProductManager {
 
   addProduct(title, description, price, thumbnail, code, stock) {
     if (!title || !description || !price || !thumbnail || !code || !stock) {
-      console.log("All fields are mandatory.");
+      console.log("Por favor rellene todos los campos");
       return;
     }
 
     if (this.products.some((product) => product.code === code)) {
-      console.log("Product with the same code already exists.");
+      console.log("Ya existe un producto con ese código");
       return;
     }
 
@@ -44,7 +44,7 @@ class ProductManager {
     if (product) {
       return product;
     } else {
-      console.log("Product not found.");
+      console.log("Producto no encontrado");
     }
   }
 }
@@ -52,27 +52,27 @@ class ProductManager {
 const productManager = new ProductManager();
 
 productManager.addProduct(
-  "Phone",
-  "Smartphone",
-  799.99,
-  "/path/to/image1",
-  "PHN001",
+  "Celular",
+  "Celular de alta gama",
+  350000,
+  "/images/phone01.png",
+  "phone01",
   100
 );
 productManager.addProduct(
-  "Laptop",
-  "High-performance laptop",
-  1499.99,
-  "/path/to/image2",
-  "LTP001",
+  "Notebook",
+  "Notebook gamer",
+  2000000,
+  "/images/notebook01.png",
+  "notebook01",
   50
 );
 productManager.addProduct(
   "Tablet",
-  "Tablet device",
-  399.99,
-  "/path/to/image3",
-  "TBL001",
+  "Tablet de gama media",
+  200000,
+  "/images/tablet01.png",
+  "tablet01",
   75
 );
 
