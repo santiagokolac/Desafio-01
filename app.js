@@ -9,7 +9,7 @@ const productManager = new ProductManager("./products.json");
 app.use(express.json());
 
 app.get("/", (req, res) => {
-  res.send("Bienvenido a la aplicación de gestión de productos.");
+  res.send("Bienvenido a la aplicación de gestión de productos");
 });
 
 app.get("/products", async (req, res) => {
@@ -23,7 +23,9 @@ app.get("/products", async (req, res) => {
 
     res.json(products);
   } catch (error) {
-    res.status(500).json({ error: "Error al obtener productos" });
+    res
+      .status(500)
+      .json({ error: `Error al obtener productos: ${error.message}` });
   }
 });
 
@@ -38,7 +40,9 @@ app.get("/products/:pid", async (req, res) => {
       res.status(404).json({ error: "Producto no encontrado" });
     }
   } catch (error) {
-    res.status(500).json({ error: "Error al obtener el producto" });
+    res
+      .status(500)
+      .json({ error: `Error al obtener el producto: ${error.message}` });
   }
 });
 
@@ -48,7 +52,7 @@ app.use((req, res) => {
 
 app.use((err, req, res, next) => {
   console.error(err.stack);
-  res.status(500).json({ error: "Algo salió mal" });
+  res.status(500).json({ error: `Algo salió mal: ${err.message}` });
 });
 
 app.listen(PORT, () => {

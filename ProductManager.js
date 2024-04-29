@@ -30,8 +30,9 @@ class ProductManager {
       product.id = this.generateUniqueId(products);
       products.push(product);
       await this.saveProductsToFile(products);
+      return "Producto agregado exitosamente";
     } catch (error) {
-      console.error("Error al agregar producto:", error);
+      throw error;
     }
   }
 
@@ -52,12 +53,10 @@ class ProductManager {
       if (product) {
         return product;
       } else {
-        console.log("Producto no encontrado");
-        return null;
+        throw new Error("Producto no encontrado");
       }
     } catch (error) {
-      console.error("Error al obtener producto por id", error);
-      return null;
+      throw new Error(`Error al obtener producto por id: ${error.message}`);
     }
   }
 
@@ -97,8 +96,9 @@ class ProductManager {
         return [];
       }
     } catch (error) {
-      console.error("Error al leer el archivo de productos", error);
-      return [];
+      throw new Error(
+        `Error al leer el archivo de productos: ${error.message}`
+      );
     }
   }
 
@@ -107,7 +107,9 @@ class ProductManager {
       await fs.promises.writeFile(this.path, JSON.stringify(products, null, 2));
       console.log("Productos guardados en el archivo exitosamente");
     } catch (error) {
-      console.error("Error al guardar productos en el archivo:", error);
+      throw new Error(
+        `Error al guardar productos en el archivo: ${error.message}`
+      );
     }
   }
 
