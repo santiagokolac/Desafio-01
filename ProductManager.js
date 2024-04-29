@@ -8,6 +8,25 @@ class ProductManager {
   async addProduct(product) {
     try {
       const products = await this.getProductsFromFile();
+      const requiredFields = [
+        "title",
+        "description",
+        "price",
+        "thumbnail",
+        "code",
+        "stock",
+      ];
+      const missingFields = requiredFields.filter(
+        (field) => !(field in product)
+      );
+      if (missingFields.length > 0) {
+        throw new Error(
+          `Campos obligatorios faltantes: ${missingFields.join(", ")}`
+        );
+      }
+      if (products.some((p) => p.code === product.code)) {
+        throw new Error("El código de producto ya existe");
+      }
       product.id = this.generateUniqueId(products);
       products.push(product);
       await this.saveProductsToFile(products);
