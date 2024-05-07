@@ -6,7 +6,9 @@
     "price": 400000,
     "thumbnail": "/images/celular.png",
     "code": "celular-01",
-    "stock": 50
+    "stock": 50,
+    "category": "Electrónicos",
+    "thumbnails": ["/images/celular1.png", "/images/celular2.png"]
   },
   {
     "id": 2,
@@ -15,7 +17,9 @@
     "price": 800000,
     "thumbnail": "/images/portatil.png",
     "code": "portatil-01",
-    "stock": 20
+    "stock": 20,
+    "category": "Electrónicos",
+    "thumbnails": ["/images/portatil1.png", "/images/portatil2.png"]
   },
   {
     "id": 3,
@@ -24,6 +28,8 @@
     "price": 300000,
     "thumbnail": "/images/tablet.png",
     "code": "tablet-01",
-    "stock": 30
+    "stock": 30,
+    "category": "Electrónicos",
+    "thumbnails": ["/images/tablet1.png", "/images/tablet2.png"]
   }
 ]
