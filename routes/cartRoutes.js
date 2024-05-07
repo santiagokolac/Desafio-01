@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const CartManager = require("../CartManager");
+const CartManager = require("../backend/CartManager");
 
 const cartManager = new CartManager("./data/carts.json");
 
@@ -36,11 +36,9 @@ router.post("/:cid/product/:pid", async (req, res) => {
     await cartManager.addProductToCart(parseInt(cid), parseInt(pid));
     res.json({ message: "Producto agregado al carrito exitosamente" });
   } catch (error) {
-    res
-      .status(400)
-      .json({
-        error: `Error al agregar producto al carrito: ${error.message}`,
-      });
+    res.status(400).json({
+      error: `Error al agregar producto al carrito: ${error.message}`,
+    });
   }
 });
 

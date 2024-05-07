@@ -1,6 +1,6 @@
 const express = require("express");
-const productRoutes = require("./routes/productRoutes");
-const cartRoutes = require("./routes/cartRoutes");
+const productRoutes = require("../routes/productRoutes");
+const cartRoutes = require("../routes/cartRoutes");
 
 const app = express();
 const PORT = process.env.PORT || 8080;

@@ -1,9 +1,9 @@
 const { v4: uuidv4 } = require("uuid");
-const ProductManager = require("./ProductManager");
-const CartManager = require("./CartManager");
+const ProductManager = require("./backend/ProductManager");
+const CartManager = require("./backend/CartManager");
 
-const productManager = new ProductManager("./products.json");
-const cartManager = new CartManager("./carts.json");
+const productManager = new ProductManager("./data/products.json");
+const cartManager = new CartManager("./data/carts.json");
 
 const main = async () => {
   try {
