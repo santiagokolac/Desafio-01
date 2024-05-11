@@ -37,19 +37,27 @@ class CartManager {
       const index = carts.findIndex((c) => c.id === cartId);
       if (index !== -1) {
         const cart = carts[index];
-        const productIndex = cart.products.findIndex((p) => p.id === productId);
-        if (productIndex !== -1) {
-          cart.products[productIndex].quantity++;
+        const product = await productManager.getProductById(productId);
+        if (product) {
+          const productIndex = cart.products.findIndex(
+            (p) => p.id === productId
+          );
+          if (productIndex !== -1) {
+            cart.products[productIndex].quantity++;
+          } else {
+            cart.products.push({ id: productId, quantity: 1 });
+          }
+          await this.saveCartsToFile(carts);
+          console.log("Producto agregado al carrito exitosamente");
         } else {
-          cart.products.push({ id: productId, quantity: 1 });
+          throw new Error("Producto inexistente");
         }
-        await this.saveCartsToFile(carts);
-        console.log("Producto agregado al carrito exitosamente");
       } else {
         console.log("Carrito no encontrado");
       }
     } catch (error) {
       console.error("Error al agregar producto al carrito:", error);
+      throw error;
     }
   }
 

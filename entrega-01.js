@@ -1,9 +1,9 @@
 const { v4: uuidv4 } = require("uuid");
-const ProductManager = require("./backend/ProductManager");
-const CartManager = require("./backend/CartManager");
+const ProductManager = require("./src/dao/ProductManager");
+const CartManager = require("./src/dao/CartManager");
 
-const productManager = new ProductManager("./data/products.json");
-const cartManager = new CartManager("./data/carts.json");
+const productManager = new ProductManager(".src/data/products.json");
+const cartManager = new CartManager("./src/data/carts.json");
 
 const main = async () => {
   try {
@@ -11,11 +11,11 @@ const main = async () => {
       title: "Nuevo Producto",
       description: "Descripción del nuevo producto",
       price: 100,
-      thumbnail: "/images/nuevo-producto.png",
+      thumbnails: "/images/nuevo-producto.png",
       code: "nuevo-producto-01",
       stock: 10,
       category: "Otros",
-      thumbnails: [
+      thumbnailss: [
         "/images/nuevo-producto1.png",
         "/images/nuevo-producto2.png",
       ],

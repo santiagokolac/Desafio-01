@@ -12,7 +12,7 @@ class ProductManager {
         "title",
         "description",
         "price",
-        "thumbnail",
+        "thumbnails",
         "code",
         "stock",
       ];
