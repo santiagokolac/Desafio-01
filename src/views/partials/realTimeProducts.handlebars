@@ -1,10 +1,11 @@
 <h1>Lista de Productos en Tiempo Real</h1>
 <ul id="product-list">
   {{#each productos}}
-    <li>{{this}}</li>
+    <li>{{this.title}} - {{this.price}}</li>
   {{/each}}
 </ul>
 <form id="product-form">
-  <input type="text" name="product" placeholder="Nombre del Producto" />
+  <input type="text" id="title" placeholder="Título del Producto" />
+  <input type="number" id="price" placeholder="Precio del Producto" />
   <button type="submit">Agregar Producto</button>
 </form>

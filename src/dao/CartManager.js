@@ -1,93 +1,81 @@
-const fs = require("fs");
+const fs = require("fs").promises;
+const path = require("path");
 
 class CartManager {
-  constructor(path) {
-    this.path = path;
+  constructor(filePath) {
+    this.path = path.join(__dirname, "..", "data", "carts.json");
   }
 
   async createCart() {
     try {
-      const carts = await this.getCartsFromFile();
-      const cart = { id: this.generateUniqueId(carts), products: [] };
-      carts.push(cart);
-      await this.saveCartsToFile(carts);
-      return cart;
+      const carts = await this._readFile();
+      const newCart = { id: this._getNextId(carts), products: [] };
+      carts.push(newCart);
+      await this._writeFile(carts);
+      return newCart;
     } catch (error) {
-      throw error;
+      throw new Error(`Error al crear carrito: ${error.message}`);
     }
   }
 
-  async getCartById(cartId) {
+  async getCartById(id) {
     try {
-      const carts = await this.getCartsFromFile();
-      const cart = carts.find((c) => c.id === cartId);
-      if (cart) {
-        return cart;
-      } else {
-        throw new Error("Carrito no encontrado");
-      }
+      const carts = await this._readFile();
+      return carts.find((cart) => cart.id === id) || null;
     } catch (error) {
-      throw new Error(`Error al obtener carrito por id: ${error.message}`);
+      throw new Error(
+        `Error al obtener carrito con ID ${id}: ${error.message}`
+      );
     }
   }
 
   async addProductToCart(cartId, productId) {
     try {
-      let carts = await this.getCartsFromFile();
-      const index = carts.findIndex((c) => c.id === cartId);
-      if (index !== -1) {
-        const cart = carts[index];
-        const product = await productManager.getProductById(productId);
-        if (product) {
-          const productIndex = cart.products.findIndex(
-            (p) => p.id === productId
-          );
-          if (productIndex !== -1) {
-            cart.products[productIndex].quantity++;
-          } else {
-            cart.products.push({ id: productId, quantity: 1 });
-          }
-          await this.saveCartsToFile(carts);
-          console.log("Producto agregado al carrito exitosamente");
-        } else {
-          throw new Error("Producto inexistente");
-        }
-      } else {
-        console.log("Carrito no encontrado");
+      const carts = await this._readFile();
+      const cart = carts.find((cart) => cart.id === cartId);
+      if (!cart) {
+        throw new Error("Carrito no encontrado");
       }
-    } catch (error) {
-      console.error("Error al agregar producto al carrito:", error);
-      throw error;
-    }
-  }
-
-  async getCartsFromFile() {
-    try {
-      if (fs.existsSync(this.path)) {
-        const cartsData = await fs.promises.readFile(this.path, "utf8");
-        return JSON.parse(cartsData);
-      } else {
-        return [];
-      }
-    } catch (error) {
-      throw new Error(`Error al leer el archivo de carritos: ${error.message}`);
-    }
-  }
-
-  async saveCartsToFile(carts) {
-    try {
-      await fs.promises.writeFile(this.path, JSON.stringify(carts, null, 2));
-      console.log("Carritos guardados en el archivo exitosamente");
+      cart.products.push(productId);
+      await this._writeFile(carts);
     } catch (error) {
       throw new Error(
-        `Error al guardar carritos en el archivo: ${error.message}`
+        `Error al agregar producto al carrito con ID ${cartId}: ${error.message}`
       );
     }
   }
 
-  generateUniqueId(carts) {
-    if (carts.length === 0) return 1;
-    const maxId = Math.max(...carts.map((c) => c.id));
+  async getAllCarts() {
+    try {
+      const carts = await this._readFile();
+      return carts;
+    } catch (error) {
+      throw new Error(`Error al obtener carritos: ${error.message}`);
+    }
+  }
+
+  async _readFile() {
+    try {
+      const data = await fs.readFile(this.path, "utf-8");
+      return JSON.parse(data);
+    } catch (error) {
+      throw new Error(`Error al leer el archivo: ${error.message}`);
+    }
+  }
+
+  async _writeFile(data) {
+    try {
+      await fs.writeFile(this.path, JSON.stringify(data, null, 2));
+    } catch (error) {
+      throw new Error(`Error al escribir en el archivo: ${error.message}`);
+    }
+  }
+
+  _getNextId(carts) {
+    const maxId = carts.reduce(
+      (max, cart) => (cart.id > max ? cart.id : max),
+      0
+    );
     return maxId + 1;
   }
 }

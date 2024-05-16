@@ -1,121 +1,94 @@
-const fs = require("fs");
+const fs = require("fs").promises;
+const path = require("path");
 
 class ProductManager {
-  constructor(path) {
-    this.path = path;
+  constructor(filePath) {
+    this.path = path.join(__dirname, "..", "data", "products.json");
   }
 
   async addProduct(product) {
     try {
-      const products = await this.getProductsFromFile();
-      const requiredFields = [
-        "title",
-        "description",
-        "price",
-        "thumbnails",
-        "code",
-        "stock",
-      ];
-      const missingFields = requiredFields.filter(
-        (field) => !(field in product)
-      );
-      if (missingFields.length > 0) {
-        throw new Error(
-          `Campos obligatorios faltantes: ${missingFields.join(", ")}`
-        );
-      }
-      if (products.some((p) => p.code === product.code)) {
-        throw new Error("El código de producto ya existe");
-      }
-      product.id = this.generateUniqueId(products);
-      products.push(product);
-      await this.saveProductsToFile(products);
+      const products = await this._readFile();
+      const newProduct = { id: this._getNextId(products), ...product };
+      products.push(newProduct);
+      await this._writeFile(products);
       return "Producto agregado exitosamente";
     } catch (error) {
-      throw error;
+      throw new Error(`Error al agregar producto: ${error.message}`);
     }
   }
 
   async getProducts() {
     try {
-      const products = await this.getProductsFromFile();
-      return products;
+      return await this._readFile();
     } catch (error) {
-      console.error("Error al obtener producto:", error);
-      return [];
+      throw new Error(`Error al obtener productos: ${error.message}`);
     }
   }
 
-  async getProductById(productId) {
+  async getProductById(id) {
     try {
-      const products = await this.getProductsFromFile();
-      const product = products.find((p) => p.id === productId);
-      if (product) {
-        return product;
-      } else {
+      const products = await this._readFile();
+      return products.find((product) => product.id === id) || null;
+    } catch (error) {
+      throw new Error(
+        `Error al obtener producto con ID ${id}: ${error.message}`
+      );
+    }
+  }
+
+  async updateProduct(id, updatedFields) {
+    try {
+      const products = await this._readFile();
+      const productIndex = products.findIndex((product) => product.id === id);
+      if (productIndex === -1) {
         throw new Error("Producto no encontrado");
       }
-    } catch (error) {
-      throw new Error(`Error al obtener producto por id: ${error.message}`);
-    }
-  }
-
-  async updateProduct(productId, updatedFields) {
-    try {
-      let products = await this.getProductsFromFile();
-      const index = products.findIndex((p) => p.id === productId);
-      if (index !== -1) {
-        products[index] = { ...products[index], ...updatedFields };
-        await this.saveProductsToFile(products);
-        console.log("Producto actualizado exitosamente");
-      } else {
-        console.log("Producto no encontrado");
-      }
-    } catch (error) {
-      console.error("Error al actualizar producto:", error);
-    }
-  }
-
-  async deleteProduct(productId) {
-    try {
-      let products = await this.getProductsFromFile();
-      products = products.filter((p) => p.id !== productId);
-      await this.saveProductsToFile(products);
-      console.log("Producto eliminado exitosamente");
-    } catch (error) {
-      console.error("Error al borrar producto", error);
-    }
-  }
-
-  async getProductsFromFile() {
-    try {
-      if (fs.existsSync(this.path)) {
-        const productsData = await fs.promises.readFile(this.path, "utf8");
-        return JSON.parse(productsData);
-      } else {
-        return [];
-      }
+      products[productIndex] = { ...products[productIndex], ...updatedFields };
+      await this._writeFile(products);
+      return "Producto actualizado exitosamente";
     } catch (error) {
       throw new Error(
-        `Error al leer el archivo de productos: ${error.message}`
+        `Error al actualizar producto con ID ${id}: ${error.message}`
       );
     }
   }
 
-  async saveProductsToFile(products) {
+  async deleteProduct(id) {
     try {
-      await fs.promises.writeFile(this.path, JSON.stringify(products, null, 2));
-      console.log("Productos guardados en el archivo exitosamente");
+      const products = await this._readFile();
+      const newProducts = products.filter((product) => product.id !== id);
+      await this._writeFile(newProducts);
+      return "Producto eliminado exitosamente";
     } catch (error) {
       throw new Error(
-        `Error al guardar productos en el archivo: ${error.message}`
+        `Error al eliminar producto con ID ${id}: ${error.message}`
       );
     }
   }
 
-  generateUniqueId(products) {
-    if (products.length === 0) return 1;
-    const maxId = Math.max(...products.map((p) => p.id));
+  async _readFile() {
+    try {
+      const data = await fs.readFile(this.path, "utf-8");
+      return JSON.parse(data);
+    } catch (error) {
+      throw new Error(`Error al leer el archivo: ${error.message}`);
+    }
+  }
+
+  async _writeFile(data) {
+    try {
+      await fs.writeFile(this.path, JSON.stringify(data, null, 2));
+    } catch (error) {
+      throw new Error(`Error al escribir en el archivo: ${error.message}`);
+    }
+  }
+
+  _getNextId(products) {
+    const maxId = products.reduce(
+      (max, product) => (product.id > max ? product.id : max),
+      0
+    );
     return maxId + 1;
   }
 }
