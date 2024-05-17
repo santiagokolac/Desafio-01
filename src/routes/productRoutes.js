@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const ProductManager = require("../dao/ProductManager");
-const io = require("../app.js");
+const { getSocket } = require("../socket");
 
 const productManager = new ProductManager("../data/products.json");
 
@@ -45,6 +45,7 @@ router.post("/", async (req, res) => {
   try {
     const product = req.body;
     const result = await productManager.addProduct(product);
+    const io = getSocket();
     io.emit("productos", await productManager.getProducts());
     res.json({ message: result });
   } catch (error) {
@@ -59,6 +60,7 @@ router.put("/:pid", async (req, res) => {
     const { pid } = req.params;
     const updatedFields = req.body;
     await productManager.updateProduct(parseInt(pid), updatedFields);
+    const io = getSocket();
     io.emit("productos", await productManager.getProducts());
     res.json({ message: "Producto actualizado exitosamente" });
   } catch (error) {
@@ -74,6 +76,7 @@ router.delete("/:pid", async (req, res) => {
   try {
     const { pid } = req.params;
     await productManager.deleteProduct(parseInt(pid));
+    const io = getSocket();
     io.emit("productos", await productManager.getProducts());
     res.json({ message: "Producto eliminado exitosamente" });
   } catch (error) {

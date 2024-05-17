@@ -14,8 +14,17 @@ document.addEventListener("DOMContentLoaded", () => {
   const productForm = document.getElementById("product-form");
   productForm.addEventListener("submit", (event) => {
     event.preventDefault();
-    const title = document.getElementById("title").value;
-    const price = document.getElementById("price").value;
-    socket.emit("nuevoProducto", { title, price });
+
+    const formData = new FormData(productForm);
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", "/api/products", true);
+    xhr.onload = function () {
+      if (xhr.status === 200) {
+        console.log("Producto agregado exitosamente");
+      } else {
+        console.error("Error al agregar producto");
+      }
+    };
+    xhr.send(formData);
   });
 });

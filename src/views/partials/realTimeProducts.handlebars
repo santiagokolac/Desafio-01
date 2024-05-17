@@ -4,8 +4,19 @@
     <li>{{this.title}} - {{this.price}}</li>
   {{/each}}
 </ul>
-<form id="product-form">
-  <input type="text" id="title" placeholder="Título del Producto" />
-  <input type="number" id="price" placeholder="Precio del Producto" />
+<form id="product-form" enctype="multipart/form-data">
+  <input
+    type="text"
+    id="title"
+    name="title"
+    placeholder="Título del Producto"
+  />
+  <input
+    type="number"
+    id="price"
+    name="price"
+    placeholder="Precio del Producto"
+  />
+  <input type="file" id="thumbnail" name="thumbnail" />
   <button type="submit">Agregar Producto</button>
 </form>
