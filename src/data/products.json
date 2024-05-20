@@ -4,59 +4,26 @@
     "title": "Celular",
     "description": "Celular de alta gama",
     "price": 400000,
-    "thumbnails": "/images/celular.png",
+    "thumbnail": "/images/celular.png",
     "code": "celular-01",
-    "stock": 50,
-    "category": "Electrónicos",
-    "thumbnailss": [
-      "/images/celular1.png",
-      "/images/celular2.png"
-    ]
+    "stock": 50
   },
   {
     "id": 2,
     "title": "Portátil",
     "description": "Laptop para trabajo y entretenimiento",
     "price": 800000,
-    "thumbnails": "/images/portatil.png",
+    "thumbnail": "/images/portatil.png",
     "code": "portatil-01",
-    "stock": 20,
-    "category": "Electrónicos",
-    "thumbnailss": [
-      "/images/portatil1.png",
-      "/images/portatil2.png"
-    ]
+    "stock": 20
   },
   {
     "id": 3,
     "title": "Tablet",
     "description": "Tablet compacta y potente",
     "price": 300000,
-    "thumbnails": "/images/tablet.png",
+    "thumbnail": "/images/tablet.png",
     "code": "tablet-01",
-    "stock": 30,
-    "category": "Electrónicos",
-    "thumbnailss": [
-      "/images/tablet1.png",
-      "/images/tablet2.png"
-    ]
-  },
-  {
-    "id": 4,
-    "title": "Producto Actualizado",
-    "price": 150,
-    "description": "Descripción del nuevo producto"
-  },
-  {
-    "id": 5,
-    "title": "Nuevo Producto",
-    "price": 200,
-    "description": "Descripción del nuevo producto"
-  },
-  {
-    "id": 6,
-    "title": "Nuevo Producto",
-    "price": 300,
-    "description": "Descripción del nuevo producto"
+    "stock": 30
   }
 ]

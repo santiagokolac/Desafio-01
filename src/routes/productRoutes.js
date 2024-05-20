@@ -33,21 +33,26 @@ router.get("/:pid", async (req, res) => {
       res.status(404).json({ error: `Producto con ID ${pid} no encontrado` });
     }
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        error: `Error al obtener producto con ID ${pid}: ${error.message}`,
-      });
+    res.status(500).json({
+      error: `Error al obtener producto con ID ${pid}: ${error.message}`,
+    });
   }
 });
 
 router.post("/", async (req, res) => {
   try {
-    const product = req.body;
-    const result = await productManager.addProduct(product);
+    const { title, description, price, thumbnail, code, stock } = req.body;
+
+    if (!title || !description || !price || !thumbnail || !code || !stock) {
+      return res
+        .status(400)
+        .json({ error: "Todos los campos son obligatorios" });
+    }
+
+    const product = await productManager.addProduct(req.body);
     const io = getSocket();
     io.emit("productos", await productManager.getProducts());
-    res.json({ message: result });
+    res.json({ message: "Producto agregado exitosamente", product });
   } catch (error) {
     res
       .status(400)
@@ -64,11 +69,9 @@ router.put("/:pid", async (req, res) => {
     io.emit("productos", await productManager.getProducts());
     res.json({ message: "Producto actualizado exitosamente" });
   } catch (error) {
-    res
-      .status(400)
-      .json({
-        error: `Error al actualizar producto con ID ${pid}: ${error.message}`,
-      });
+    res.status(400).json({
+      error: `Error al actualizar producto con ID ${pid}: ${error.message}`,
+    });
   }
 });
 
@@ -80,11 +83,9 @@ router.delete("/:pid", async (req, res) => {
     io.emit("productos", await productManager.getProducts());
     res.json({ message: "Producto eliminado exitosamente" });
   } catch (error) {
-    res
-      .status(400)
-      .json({
-        error: `Error al eliminar producto con ID ${pid}: ${error.message}`,
-      });
+    res.status(400).json({
+      error: `Error al eliminar producto con ID ${pid}: ${error.message}`,
+    });
   }
 });
 

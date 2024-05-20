@@ -1,30 +1,41 @@
 document.addEventListener("DOMContentLoaded", () => {
   const socket = io();
 
-  socket.on("productos", (productos) => {
-    const productList = document.getElementById("product-list");
-    productList.innerHTML = "";
-    productos.forEach((product) => {
-      const listItem = document.createElement("li");
-      listItem.textContent = `${product.title} - ${product.price}`;
-      productList.appendChild(listItem);
-    });
-  });
-
-  const productForm = document.getElementById("product-form");
-  productForm.addEventListener("submit", (event) => {
+  function addProduct(event) {
     event.preventDefault();
 
-    const formData = new FormData(productForm);
-    const xhr = new XMLHttpRequest();
-    xhr.open("POST", "/api/products", true);
-    xhr.onload = function () {
-      if (xhr.status === 200) {
-        console.log("Producto agregado exitosamente");
-      } else {
-        console.error("Error al agregar producto");
-      }
-    };
-    xhr.send(formData);
-  });
+    const title = document.getElementById("title").value;
+    const description = document.getElementById("description").value;
+    const price = document.getElementById("price").value;
+    const thumbnail = document.getElementById("thumbnail").value;
+    const code = document.getElementById("code").value;
+    const stock = document.getElementById("stock").value;
+
+    socket.emit("addProduct", {
+      title,
+      description,
+      price,
+      thumbnail,
+      code,
+      stock,
+    });
+
+    document.getElementById("productForm").reset();
+  }
+
+  function deleteProduct(event) {
+    event.preventDefault();
+
+    const productId = document.getElementById("deleteId").value;
+
+    socket.emit("deleteProduct", { id: parseInt(productId) });
+
+    document.getElementById("deleteId").value = "";
+  }
+
+  const productForm = document.getElementById("productForm");
+  productForm.addEventListener("submit", addProduct);
+
+  const deleteForm = document.getElementById("deleteForm");
+  deleteForm.addEventListener("submit", deleteProduct);
 });

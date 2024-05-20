@@ -1,22 +1,46 @@
-<h1>Lista de Productos en Tiempo Real</h1>
-<ul id="product-list">
-  {{#each productos}}
-    <li>{{this.title}} - {{this.price}}</li>
-  {{/each}}
-</ul>
-<form id="product-form" enctype="multipart/form-data">
-  <input
-    type="text"
-    id="title"
-    name="title"
-    placeholder="Título del Producto"
-  />
-  <input
-    type="number"
-    id="price"
-    name="price"
-    placeholder="Precio del Producto"
-  />
-  <input type="file" id="thumbnail" name="thumbnail" />
-  <button type="submit">Agregar Producto</button>
-</form>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Real-Time Products</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      const socket = io(); socket.on('products', (data) => { const
+      productContainer = document.getElementById('productContainer');
+      productContainer.innerHTML = ''; data.forEach(product => { const
+      productElement = document.createElement('div'); productElement.innerHTML =
+      ` <h3>${product.title}</h3> <p>${product.description}</p> <p>Price:
+      $${product.price}</p> <p>Stock: ${product.stock}</p> <p>Code:
+      ${product.code}</p> <p><img src="${product.thumbnail}"
+      alt="${product.title}"></p> `;
+      productContainer.appendChild(productElement); }); }); function
+      addProduct(event) { event.preventDefault(); const title =
+      document.getElementById('title').value; const description =
+      document.getElementById('description').value; const price =
+      document.getElementById('price').value; const thumbnail =
+      document.getElementById('thumbnail').value; const code =
+      document.getElementById('code').value; const stock =
+      document.getElementById('stock').value; socket.emit('addProduct', { title,
+      description, price, thumbnail, code, stock }); } function
+      deleteProduct(event) { event.preventDefault(); const id =
+      document.getElementById('deleteId').value; socket.emit('deleteProduct', {
+      id }); }
+    </script>
+  </head>
+  <body>
+    <h1>Real-Time Products</h1>
+    <div id="productContainer"></div>
+    <form id="productForm" onsubmit="addProduct(event)">
+      <input type="text" id="title" placeholder="Title" required />
+      <input type="text" id="description" placeholder="Description" required />
+      <input type="number" id="price" placeholder="Price" required />
+      <input type="text" id="thumbnail" placeholder="Thumbnail URL" required />
+      <input type="text" id="code" placeholder="Code" required />
+      <input type="number" id="stock" placeholder="Stock" required />
+      <button type="submit">Add Product</button>
+    </form>
+    <form id="deleteForm" onsubmit="deleteProduct(event)">
+      <input type="number" id="deleteId" placeholder="Product ID" required />
+      <button type="submit">Delete Product</button>
+    </form>
+  </body>
+</html>
