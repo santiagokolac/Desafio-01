@@ -21,7 +21,7 @@
     "id": 3,
     "title": "Tablet",
     "description": "Tablet compacta y potente",
-    "price": 300000,
+    "price": 30000,
     "thumbnail": "/images/tablet.png",
     "code": "tablet-01",
     "stock": 30
