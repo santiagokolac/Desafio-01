@@ -61,12 +61,22 @@ router.post("/", async (req, res) => {
 });
 
 router.put("/:pid", async (req, res) => {
+  let pid;
   try {
-    const { pid } = req.params;
+    pid = req.params.pid;
     const updatedFields = req.body;
+
+    if (Object.keys(updatedFields).length === 0) {
+      return res
+        .status(400)
+        .json({ error: "No se proporcionaron campos para actualizar" });
+    }
+
     await productManager.updateProduct(parseInt(pid), updatedFields);
+
     const io = getSocket();
     io.emit("productos", await productManager.getProducts());
+
     res.json({ message: "Producto actualizado exitosamente" });
   } catch (error) {
     res.status(400).json({

@@ -4,6 +4,17 @@ const path = require("path");
 class ProductManager {
   constructor(filePath) {
     this.path = path.join(__dirname, "..", "data", "products.json");
+    this._initializeProducts();
+  }
+
+  async _initializeProducts() {
+    try {
+      const products = await fs.readFile(this.path, "utf-8");
+      this.products = JSON.parse(products);
+    } catch (error) {
+      console.error("Error inicializando productos:", error);
+      this.products = [];
+    }
   }
 
   async _readFile() {
@@ -11,12 +22,18 @@ class ProductManager {
       const data = await fs.readFile(this.path, "utf-8");
       return JSON.parse(data);
     } catch (error) {
+      console.error("Error al leer el archivo:", error);
       return [];
     }
   }
 
   async _writeFile(data) {
-    await fs.writeFile(this.path, JSON.stringify(data, null, 2));
+    try {
+      await fs.writeFile(this.path, JSON.stringify(data, null, 2));
+    } catch (error) {
+      console.error("Error al escribir en el archivo:", error);
+      throw new Error("Error al guardar los datos");
+    }
   }
 
   async addProduct({ title, description, price, thumbnail, code, stock }) {
@@ -72,13 +89,18 @@ class ProductManager {
   }
 
   async updateProduct(id, update) {
-    const products = await this._readFile();
-    const index = products.findIndex((product) => product.id === id);
-    if (index === -1) {
-      throw new Error("Not found");
+    try {
+      const products = await this._readFile();
+      const index = products.findIndex((product) => product.id === id);
+      if (index === -1) {
+        throw new Error("Not found");
+      }
+
+      products[index] = { ...products[index], ...update, id };
+      await this._writeFile(products);
+    } catch (error) {
+      throw new Error(`Error updating product with ID ${id}: ${error.message}`);
     }
-    products[index] = { ...products[index], ...update, id };
-    await this._writeFile(products);
   }
 }
 
