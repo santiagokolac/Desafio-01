@@ -65,24 +65,7 @@ app.get("/realtimeproducts", async (req, res) => {
 
 const filePath = path.join(__dirname, "data", "products.json");
 
-app.get("/api/products", (req, res) => {
-  fs.readFile(filePath, (err, data) => {
-    if (err) {
-      console.error("Error leyendo el archivo JSON:", err);
-      return res.status(500).json({ error: "Error leyendo los productos" });
-    }
-
-    try {
-      const products = JSON.parse(data);
-      res.json(products);
-    } catch (error) {
-      console.error("Error parsing JSON:", error);
-      res.status(500).json({ error: "Error procesando los productos" });
-    }
-  });
-});
-
-app.get("/products", async (req, res) => {
+app.get("/api/products", async (req, res) => {
   try {
     let { limit = 10, page = 1, sort, query } = req.query;
     limit = parseInt(limit);
@@ -130,6 +113,61 @@ app.get("/products", async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ status: "error", message: error.message });
+  }
+});
+
+app.get("/products", async (req, res) => {
+  try {
+    let { limit = 10, page = 1, sort, query } = req.query;
+    limit = parseInt(limit);
+    page = parseInt(page);
+
+    let filter = {};
+    if (query) {
+      filter = {
+        $or: [{ category: query }, { availability: query }],
+      };
+    }
+
+    let sortOption = {};
+    if (sort === "asc") {
+      sortOption = { price: 1 };
+    } else if (sort === "desc") {
+      sortOption = { price: -1 };
+    }
+
+    const products = await Product.find(filter)
+      .sort(sortOption)
+      .skip((page - 1) * limit)
+      .limit(limit);
+
+    const totalProducts = await Product.countDocuments(filter);
+    const totalPages = Math.ceil(totalProducts / limit);
+
+    res.json({
+      status: "success",
+      payload: products,
+      totalPages: totalPages,
+      prevPage: page > 1 ? page - 1 : null,
+      nextPage: page < totalPages ? page + 1 : null,
+      page: page,
+      hasPrevPage: page > 1,
+      hasNextPage: page < totalPages,
+      prevLink:
+        page > 1
+          ? `/products?limit=${limit}&page=${
+              page - 1
+            }&sort=${sort}&query=${query}`
+          : null,
+      nextLink:
+        page < totalPages
+          ? `/products?limit=${limit}&page=${
+              page + 1
+            }&sort=${sort}&query=${query}`
+          : null,
+    });
+  } catch (err) {
+    res.status(500).json({ status: "error", message: err.message });
   }
 });
 
@@ -220,24 +258,23 @@ app.get("/views/carts/:cid", async (req, res) => {
 app.get("/api/carts/:cid", async (req, res) => {
   try {
     const { cid } = req.params;
-    const cart = await Cart.findById(cid).populate("products.product");
+    const cart = await Cart.findById(cid).populate("products.productId");
     res.json({ status: "success", payload: cart });
-  } catch (error) {
-    res.status(500).json({ status: "error", message: error.message });
+  } catch (err) {
+    res.status(500).json({ status: "error", message: err.message });
   }
 });
 
 app.delete("/api/carts/:cid/products/:pid", async (req, res) => {
   try {
     const { cid, pid } = req.params;
-    const cart = await Cart.findById(cid);
-    cart.products = cart.products.filter(
-      (product) => product._id.toString() !== pid
+    await Cart.updateOne(
+      { _id: cid },
+      { $pull: { products: { productId: pid } } }
     );
-    await cart.save();
     res.json({ status: "success", message: "Product removed from cart" });
-  } catch (error) {
-    res.status(500).json({ status: "error", message: error.message });
+  } catch (err) {
+    res.status(500).json({ status: "error", message: err.message });
   }
 });
 
@@ -245,12 +282,10 @@ app.put("/api/carts/:cid", async (req, res) => {
   try {
     const { cid } = req.params;
     const { products } = req.body;
-    const cart = await Cart.findById(cid);
-    cart.products = products;
-    await cart.save();
+    await Cart.updateOne({ _id: cid }, { products: products });
     res.json({ status: "success", message: "Cart updated" });
-  } catch (error) {
-    res.status(500).json({ status: "error", message: error.message });
+  } catch (err) {
+    res.status(500).json({ status: "error", message: err.message });
   }
 });
 
@@ -258,33 +293,23 @@ app.put("/api/carts/:cid/products/:pid", async (req, res) => {
   try {
     const { cid, pid } = req.params;
     const { quantity } = req.body;
-    const cart = await Cart.findById(cid);
-    const product = cart.products.find(
-      (product) => product._id.toString() === pid
+    await Cart.updateOne(
+      { _id: cid, "products.productId": pid },
+      { $set: { "products.$.quantity": quantity } }
     );
-    if (product) {
-      product.quantity = quantity;
-      await cart.save();
-      res.json({ status: "success", message: "Product quantity updated" });
-    } else {
-      res
-        .status(404)
-        .json({ status: "error", message: "Product not found in cart" });
-    }
-  } catch (error) {
-    res.status(500).json({ status: "error", message: error.message });
+    res.json({ status: "success", message: "Product quantity updated" });
+  } catch (err) {
+    res.status(500).json({ status: "error", message: err.message });
   }
 });
 
 app.delete("/api/carts/:cid", async (req, res) => {
   try {
     const { cid } = req.params;
-    const cart = await Cart.findById(cid);
-    cart.products = [];
-    await cart.save();
+    await Cart.updateOne({ _id: cid }, { $set: { products: [] } });
     res.json({ status: "success", message: "All products removed from cart" });
-  } catch (error) {
-    res.status(500).json({ status: "error", message: error.message });
+  } catch (err) {
+    res.status(500).json({ status: "error", message: err.message });
   }
 });
 
