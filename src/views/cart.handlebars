@@ -1,0 +1,21 @@
+<h1>Cart</h1>
+<ul>
+  {{#each cart.products}}
+    <li>
+      <h2>{{this.product.name}}</h2>
+      <p>Price: {{this.product.price}}</p>
+      <p>Quantity: {{this.quantity}}</p>
+      <button onclick="removeFromCart('{{this.product._id}}')">Remove</button>
+    </li>
+  {{/each}}
+</ul>
+
+<script>
+  async function removeFromCart(productId) { try { const response = await
+  fetch('/api/cart/remove', { method: 'POST', headers: { 'Content-Type':
+  'application/json' }, body: JSON.stringify({ productId }) }); if
+  (!response.ok) { throw new Error('Failed to remove product from cart'); }
+  alert('Product removed from cart'); location.reload(); } catch (error) {
+  console.error('Error:', error); alert('Could not remove product from cart'); }
+  }
+</script>

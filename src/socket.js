@@ -1,26 +1,15 @@
-const socketIo = require("socket.io");
+import { Server } from "socket.io";
 
 let io;
 
-const initializeSocket = (server) => {
-  io = socketIo(server);
-
-  io.on("connection", (socket) => {
-    console.log("Nuevo cliente conectado");
-
-    socket.on("disconnect", () => {
-      console.log("Cliente desconectado");
-    });
-  });
-
+export const initializeSocket = (server) => {
+  io = new Server(server);
   return io;
 };
 
-const getSocket = () => {
+export const getSocket = () => {
   if (!io) {
-    throw new Error("Socket.io no está inicializado");
+    throw new Error("Socket.io not initialized");
   }
   return io;
 };
-
-module.exports = { initializeSocket, getSocket };

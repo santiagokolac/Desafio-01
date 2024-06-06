@@ -1,5 +1,5 @@
-const ProductManager = require("./src/dao/ProductManager");
-const CartManager = require("./src/dao/CartManager");
+import ProductManager from "./src/dao/ProductManager.js";
+import CartManager from "./src/dao/CartManager.js";
 
 const productManager = new ProductManager("./src/data/products.json");
 const cartManager = new CartManager("./src/data/carts.json");
@@ -10,14 +10,10 @@ const main = async () => {
       title: "Nuevo Producto",
       description: "Descripción del nuevo producto",
       price: 100,
-      thumbnails: "/images/nuevo-producto.png",
+      thumbnail: "/images/nuevo-producto.png",
       code: "nuevo-producto-01",
       stock: 10,
       category: "Otros",
-      thumbnailss: [
-        "/images/nuevo-producto1.png",
-        "/images/nuevo-producto2.png",
-      ],
     };
     await productManager.addProduct(product);
     console.log("Producto agregado exitosamente");

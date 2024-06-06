@@ -1,41 +1,36 @@
-document.addEventListener("DOMContentLoaded", () => {
-  const socket = io();
+const socket = io();
 
-  function addProduct(event) {
-    event.preventDefault();
-
-    const title = document.getElementById("title").value;
-    const description = document.getElementById("description").value;
-    const price = document.getElementById("price").value;
-    const thumbnail = document.getElementById("thumbnail").value;
-    const code = document.getElementById("code").value;
-    const stock = document.getElementById("stock").value;
-
-    socket.emit("addProduct", {
-      title,
-      description,
-      price,
-      thumbnail,
-      code,
-      stock,
-    });
-
-    document.getElementById("productForm").reset();
-  }
-
-  function deleteProduct(event) {
-    event.preventDefault();
-
-    const productId = document.getElementById("deleteId").value;
-
-    socket.emit("deleteProduct", { id: parseInt(productId) });
-
-    document.getElementById("deleteId").value = "";
-  }
-
-  const productForm = document.getElementById("productForm");
-  productForm.addEventListener("submit", addProduct);
-
-  const deleteForm = document.getElementById("deleteForm");
-  deleteForm.addEventListener("submit", deleteProduct);
+socket.on("connect", () => {
+  console.log("Conectado al servidor de WebSocket");
 });
+
+socket.on("products", (products) => {
+  const productList = document.getElementById("product-list");
+  productList.innerHTML = "";
+  products.forEach((product) => {
+    const li = document.createElement("li");
+    li.textContent = product.title;
+    productList.appendChild(li);
+  });
+});
+
+document
+  .getElementById("add-product-form")
+  .addEventListener("submit", (event) => {
+    event.preventDefault();
+    const formData = new FormData(event.target);
+    const product = {};
+    formData.forEach((value, key) => {
+      product[key] = value;
+    });
+    socket.emit("addProduct", product);
+  });
+
+document
+  .getElementById("delete-product-form")
+  .addEventListener("submit", (event) => {
+    event.preventDefault();
+    const formData = new FormData(event.target);
+    const productId = formData.get("id");
+    socket.emit("deleteProduct", { id: productId });
+  });

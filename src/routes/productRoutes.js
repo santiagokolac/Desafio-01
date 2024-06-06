@@ -1,102 +1,58 @@
-const express = require("express");
-const router = express.Router();
-const ProductManager = require("../dao/ProductManager");
-const { getSocket } = require("../socket");
+import { Router } from "express";
+import ProductManager from "../dao/fileSystem/ProductManager.js";
 
-const productManager = new ProductManager("../data/products.json");
-
-router.get("/", async (req, res) => {
-  try {
-    const { limit } = req.query;
-    let products = await productManager.getProducts();
-
-    if (limit) {
-      products = products.slice(0, parseInt(limit));
-    }
-
-    res.json(products);
-  } catch (error) {
-    res
-      .status(500)
-      .json({ error: `Error al obtener productos: ${error.message}` });
-  }
-});
-
-router.get("/:pid", async (req, res) => {
-  try {
-    const { pid } = req.params;
-    const product = await productManager.getProductById(parseInt(pid));
-
-    if (product) {
-      res.json(product);
-    } else {
-      res.status(404).json({ error: `Producto con ID ${pid} no encontrado` });
-    }
-  } catch (error) {
-    res.status(500).json({
-      error: `Error al obtener producto con ID ${pid}: ${error.message}`,
-    });
-  }
-});
+const productManager = new ProductManager();
+const router = Router();
 
 router.post("/", async (req, res) => {
   try {
-    const { title, description, price, thumbnail, code, stock } = req.body;
-
-    if (!title || !description || !price || !thumbnail || !code || !stock) {
-      return res
-        .status(400)
-        .json({ error: "Todos los campos son obligatorios" });
-    }
-
-    const product = await productManager.addProduct(req.body);
-    const io = getSocket();
-    io.emit("productos", await productManager.getProducts());
-    res.json({ message: "Producto agregado exitosamente", product });
+    await productManager.addProduct(req.body);
+    res.status(201).json({ message: "Producto agregado exitosamente" });
   } catch (error) {
-    res
-      .status(400)
-      .json({ error: `Error al agregar producto: ${error.message}` });
+    res.status(500).json({ error: error.message });
   }
 });
 
-router.put("/:pid", async (req, res) => {
-  let pid;
+router.get("/", async (req, res) => {
   try {
-    pid = req.params.pid;
-    const updatedFields = req.body;
+    const products = await productManager.getProducts();
+    res.json(products);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 
-    if (Object.keys(updatedFields).length === 0) {
-      return res
-        .status(400)
-        .json({ error: "No se proporcionaron campos para actualizar" });
+router.get("/:id", async (req, res) => {
+  try {
+    const product = await productManager.getProductById(
+      parseInt(req.params.id, 10)
+    );
+    if (product) {
+      res.json(product);
+    } else {
+      res.status(404).json({ error: "Producto no encontrado" });
     }
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 
-    await productManager.updateProduct(parseInt(pid), updatedFields);
-
-    const io = getSocket();
-    io.emit("productos", await productManager.getProducts());
-
+router.put("/:id", async (req, res) => {
+  try {
+    await productManager.updateProduct(parseInt(req.params.id, 10), req.body);
     res.json({ message: "Producto actualizado exitosamente" });
   } catch (error) {
-    res.status(400).json({
-      error: `Error al actualizar producto con ID ${pid}: ${error.message}`,
-    });
+    res.status(500).json({ error: error.message });
   }
 });
 
-router.delete("/:pid", async (req, res) => {
+router.delete("/:id", async (req, res) => {
   try {
-    const { pid } = req.params;
-    await productManager.deleteProduct(parseInt(pid));
-    const io = getSocket();
-    io.emit("productos", await productManager.getProducts());
+    await productManager.deleteProduct(parseInt(req.params.id, 10));
     res.json({ message: "Producto eliminado exitosamente" });
   } catch (error) {
-    res.status(400).json({
-      error: `Error al eliminar producto con ID ${pid}: ${error.message}`,
-    });
+    res.status(500).json({ error: error.message });
   }
 });
 
-module.exports = router;
+export default router;
